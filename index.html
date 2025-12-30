@@ -1,0 +1,957 @@
+html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>睡眠记录助手 | 改善睡眠质量</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #6b8cbc;
+            --accent-color: #ff9a76;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --border-radius: 10px;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: #f0f5ff;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 25px 0;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo i {
+            font-size: 2.5rem;
+        }
+
+        .logo h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stats-summary {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 992px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h2 i {
+            font-size: 1.5rem;
+        }
+
+        .record-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .record-form {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
+        }
+
+        .form-actions {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #3a5a8c;
+        }
+
+        .btn-secondary {
+            background-color: #e9ecef;
+            color: var(--dark-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #dde1e6;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+        .chart-container {
+            height: 300px;
+            margin-top: 20px;
+        }
+
+        .history-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .sleep-record {
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sleep-record:last-child {
+            border-bottom: none;
+        }
+
+        .sleep-date {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .sleep-duration {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .sleep-quality {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .quality-excellent {
+            background-color: rgba(40, 167, 69, 0.2);
+            color: var(--success-color);
+        }
+
+        .quality-good {
+            background-color: rgba(74, 111, 165, 0.2);
+            color: var(--primary-color);
+        }
+
+        .quality-fair {
+            background-color: rgba(255, 154, 118, 0.2);
+            color: #ff7a45;
+        }
+
+        .quality-poor {
+            background-color: rgba(220, 53, 69, 0.2);
+            color: var(--danger-color);
+        }
+
+        .no-data {
+            text-align: center;
+            color: #999;
+            padding: 40px 0;
+            font-style: italic;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .delete-btn:hover {
+            color: var(--danger-color);
+        }
+
+        .sleep-tips {
+            margin-top: 40px;
+        }
+
+        .tip {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius);
+        }
+         .tip i {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: #666;
+            margin-top: 40px;
+            border-top: 1px solid #ddd;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-moon"></i>
+                    <h1>睡眠记录助手</h1>
+                </div>
+                <div class="user-info">
+                    <div class="avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                        <h3>睡眠记录者</h3>
+                        <p>第<span id="streak-days">14</span>天连续记录</p>
+                    </div>
+                </div>
+            </div>
+            <div class="stats-summary">
+                <div class="stat-card">
+                    <i class="fas fa-bed"></i>
+                    <div class="stat-value" id="avg-sleep">7.2h</div>
+                    <div class="stat-label">平均睡眠时长</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-star"></i>
+                    <div class="stat-value" id="avg-quality">8.1</div>
+                    <div class="stat-label">平均睡眠质量</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-calendar-alt"></i>
+                    <div class="stat-value" id="total-records">24</div>
+                    <div class="stat-label">总记录天数</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-bullseye"></i>
+                    <div class="stat-value" id="sleep-goal">85%</div>
+                    <div class="stat-label">目标达成率</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="main-content">
+            <div class="left-column">
+                <div class="card">
+                    <h2><i class="fas fa-plus-circle"></i> 记录今日睡眠</h2>
+                    <form id="sleep-form">
+                        <div class="record-form">
+                            <div class="form-group">
+                                <label for="sleep-date"><i class="far fa-calendar"></i> 日期</label>
+                                <input type="date" id="sleep-date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="bedtime"><i class="far fa-clock"></i> 上床时间</label>
+                                <input type="time" id="bedtime" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="waketime"><i class="fas fa-clock"></i> 起床时间</label>
+                                <input type="time" id="waketime" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="sleep-quality"><i class="fas fa-chart-line"></i> 睡眠质量评分</label>
+                                <select id="sleep-quality" required>
+                                    <option value="">请选择评分</option>
+                                    <option value="10">10 - 极好</option>
+                                    <option value="9">9 - 非常好</option>
+                                    <option value="8">8 - 很好</option>
+                                    <option value="7">7 - 好</option>
+                                    <option value="6">6 - 一般</option>
+                                    <option value="5">5 - 普通</option>
+                                    <option value="4">4 - 较差</option>
+                                    <option value="3">3 - 差</option>
+                                    <option value="2">2 - 非常差</option>
+                                    <option value="1">1 - 极差</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="sleep-notes"><i class="far fa-edit"></i> 备注 (可选)</label>
+                                <textarea id="sleep-notes" rows="3" placeholder="记录影响睡眠的因素，如咖啡因摄入、压力、运动等..."></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" id="reset-btn">
+                                    <i class="fas fa-redo"></i> 重置
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> 保存记录
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2><i class="fas fa-chart-bar"></i> 本周睡眠趋势</h2>
+                    <div class="chart-container">
+                        <canvas id="sleep-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-column">
+                <div class="card">
+                    <h2><i class="fas fa-history"></i> 最近睡眠记录</h2>
+                    <div class="history-list" id="sleep-history">
+                        <!-- 睡眠记录会动态添加到这里 -->
+                    </div>
+                    <div class="no-data" id="no-history">暂无睡眠记录，请添加您的第一条记录。</div>
+                </div>
+
+                <div class="card sleep-tips">
+                    <h2><i class="fas fa-lightbulb"></i> 改善睡眠小贴士</h2>
+                    <div class="tip">
+                        <i class="fas fa-temperature-low"></i>
+                        <div>
+                            <h4>保持适宜温度</h4>
+                            <p>卧室温度最好保持在18-22°C之间，有利于进入深度睡眠。</p>
+                        </div>
+                    </div>
+                    <div class="tip">
+                        <i class="fas fa-mobile-alt"></i>
+                        <div>
+                            <h4>睡前远离电子设备</h4>
+                            <p>睡前一小时避免使用手机、电脑等电子设备，减少蓝光影响。</p>
+                        </div>
+                    </div>
+                    <div class="tip">
+                        <i class="fas fa-coffee"></i>
+                        <div>
+                            <h4>控制咖啡因摄入</h4>
+                            <p>下午2点后避免摄入咖啡因，以免影响夜间睡眠。</p>
+                        </div>
+                    </div>
+                    <div class="tip">
+                        <i class="fas fa-bed"></i>
+                        <div>
+                            <h4>保持规律作息</h4>
+                            <p>每天尽量在同一时间上床睡觉和起床，即使周末也不例外。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="container">
+        <p>睡眠记录助手 &copy; 2023 | 跟踪您的睡眠模式，改善睡眠质量</p>
+        <p>本应用数据存储在您的浏览器本地，不会上传到任何服务器</p>
+    </footer>
+
+    <!-- 详情模态框 -->
+    <div class="modal" id="detail-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>睡眠记录详情</h2>
+                <button class="close-modal" id="close-modal">&times;</button>
+            </div>
+            <div id="modal-body">
+                <!-- 详情内容会动态添加到这里 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化睡眠记录数组
+        let sleepRecords = JSON.parse(localStorage.getItem('sleepRecords')) || [];
+
+        // DOM元素
+        const sleepForm = document.getElementById('sleep-form');
+        const sleepDate = document.getElementById('sleep-date');
+        const bedtime = document.getElementById('bedtime');
+        const waketime = document.getElementById('waketime');
+        const sleepQuality = document.getElementById('sleep-quality');
+        const sleepNotes = document.getElementById('sleep-notes');
+        const resetBtn = document.getElementById('reset-btn');
+        const sleepHistory = document.getElementById('sleep-history');
+        const noHistory = document.getElementById('no-history');
+        const avgSleepEl = document.getElementById('avg-sleep');
+        const avgQualityEl = document.getElementById('avg-quality');
+        const totalRecordsEl = document.getElementById('total-records');
+        const sleepGoalEl = document.getElementById('sleep-goal');
+        const streakDaysEl = document.getElementById('streak-days');
+        const detailModal = document.getElementById('detail-modal');
+        const closeModal = document.getElementById('close-modal');
+        const modalBody = document.getElementById('modal-body');
+
+        // 设置日期为今天
+        const today = new Date().toISOString().split('T')[0];
+        sleepDate.value = today;
+
+        // 设置默认时间
+        const now = new Date();
+        bedtime.value = "22:30";
+        waketime.value = "06:30";
+
+        // 初始化图表
+        let sleepChart;
+        initChart();
+
+        // 页面加载时显示记录和统计数据
+        document.addEventListener('DOMContentLoaded', function() {
+            displaySleepHistory();
+            updateStats();
+            updateChart();
+        });
+
+        // 表单提交事件
+        sleepForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // 计算睡眠时长
+            const bedtimeDate = new Date(`${sleepDate.value}T${bedtime.value}`);
+            const waketimeDate = new Date(`${sleepDate.value}T${waketime.value}`);
+            
+            // 如果起床时间小于上床时间，则假定是第二天起床
+            if (waketimeDate < bedtimeDate) {
+                waketimeDate.setDate(waketimeDate.getDate() + 1);
+            }
+            
+            const sleepDuration = (waketimeDate - bedtimeDate) / (1000 * 60 * 60); // 小时
+            
+            // 创建记录对象
+            const record = {
+                id: Date.now(),
+                date: sleepDate.value,
+                bedtime: bedtime.value,
+                waketime: waketime.value,
+                duration: sleepDuration.toFixed(1),
+                quality: parseInt(sleepQuality.value),
+                notes: sleepNotes.value,
+                timestamp: new Date().toISOString()
+            };
+            
+            // 添加到记录数组
+            sleepRecords.unshift(record);
+            
+            // 保存到本地存储
+            localStorage.setItem('sleepRecords', JSON.stringify(sleepRecords));
+            
+            // 更新显示
+            displaySleepHistory();
+            updateStats();
+            updateChart();
+            
+            // 显示成功消息
+            alert(`睡眠记录已保存！\n睡眠时长：${record.duration}小时\n睡眠质量：${record.quality}/10`);
+            
+            // 重置表单
+            resetForm();
+        });
+
+        // 重置表单
+        resetBtn.addEventListener('click', resetForm);
+
+        // 关闭模态框
+        closeModal.addEventListener('click', function() {
+            detailModal.style.display = 'none';
+        });
+
+        // 点击模态框外部关闭
+        window.addEventListener('click', function(e) {
+            if (e.target === detailModal) {
+                detailModal.style.display = 'none';
+            }
+        });
+
+        // 重置表单函数function resetForm() {
+            sleepDate.value = today;
+            bedtime.value = "22:30";
+            waketime.value = "06:30";
+            sleepQuality.value = "";
+            sleepNotes.value = "";
+        
+
+        // 显示睡眠记录历史
+        function displaySleepHistory() {
+            if (sleepRecords.length === 0) {
+                noHistory.style.display = 'block';
+                sleepHistory.innerHTML = '';
+                return;
+            }
+            
+            noHistory.style.display = 'none';
+            sleepHistory.innerHTML = '';
+            
+            // 只显示最近的10条记录
+            const recentRecords = sleepRecords.slice(0, 10);
+            
+            recentRecords.forEach(record => {
+                const recordEl = document.createElement('div');
+                recordEl.className = 'sleep-record';
+                
+                // 格式化日期
+                const date = new Date(record.date);
+                const formattedDate = date.toLocaleDateString('zh-CN', { 
+                    weekday: 'short', 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+                
+                // 根据质量评分确定CSS类
+                let qualityClass = 'quality-fair';
+                if (record.quality >= 8) qualityClass = 'quality-excellent';
+                else if (record.quality >= 6) qualityClass = 'quality-good';
+                else if (record.quality >= 4) qualityClass = 'quality-fair';
+                else qualityClass = 'quality-poor';
+                
+                recordEl.innerHTML = `
+                    <div>
+                        <div class="sleep-date">${formattedDate}</div>
+                        <div>${record.bedtime} - ${record.waketime}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="sleep-duration">${record.duration} 小时</div>
+                        <div class="sleep-quality ${qualityClass}">${record.quality}/10</div>
+                    </div>
+                    <div>
+                        <button class="delete-btn" data-id="${record.id}" title="删除记录">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                        <button class="view-btn" data-id="${record.id}" title="查看详情" style="background: none; border: none; color: var(--primary-color); cursor: pointer; margin-left: 10px;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                `;
+                
+                sleepHistory.appendChild(recordEl);
+            });
+            
+            // 添加删除事件监听器
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    if (confirm('确定要删除这条记录吗？')) {
+                        deleteRecord(id);
+                    }
+                });
+            });
+            
+            // 添加查看详情事件监听器
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    showRecordDetails(id);
+                });
+            });
+        }
+
+        // 删除记录
+        function deleteRecord(id) {
+            sleepRecords = sleepRecords.filter(record => record.id !== id);
+            localStorage.setItem('sleepRecords', JSON.stringify(sleepRecords));
+            displaySleepHistory();
+            updateStats();
+            updateChart();
+        }
+
+        // 显示记录详情
+        function showRecordDetails(id) {
+            const record = sleepRecords.find(record => record.id === id);
+            if (!record) return;
+            
+            // 格式化日期
+            const date = new Date(record.date);
+            const formattedDate = date.toLocaleDateString('zh-CN', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                weekday: 'long'
+            });
+            
+            // 计算入睡效率
+            const efficiency = (record.quality / 10 * 100).toFixed(0);
+            
+            // 根据质量评分确定描述
+            let qualityDesc = '一般';
+            if (record.quality >= 9) qualityDesc = '极好';
+            else if (record.quality >= 8) qualityDesc = '非常好';
+            else if (record.quality >= 7) qualityDesc = '很好';
+            else if (record.quality >= 6) qualityDesc = '好';
+            else if (record.quality >= 4) qualityDesc = '一般';
+            else if (record.quality >= 2) qualityDesc = '差';
+            else qualityDesc = '极差';
+            
+            modalBody.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <h3 style="color: var(--primary-color); margin-bottom: 10px;">${formattedDate}</h3>
+                    <p><strong>上床时间:</strong> ${record.bedtime}</p>
+                    <p><strong>起床时间:</strong> ${record.waketime}</p>
+                    <p><strong>睡眠时长:</strong> <span style="color: var(--primary-color); font-weight: 600;">${record.duration} 小时</span></p>
+                    <p><strong>睡眠质量:</strong> <span style="font-weight: 600;">${record.quality}/10 (${qualityDesc})</span></p>
+                    <p><strong>睡眠效率:</strong> ${efficiency}%</p>
+                </div>
+                ${record.notes ? `<div style="margin-bottom: 20px;">
+                    <h4 style="color: var(--primary-color); margin-bottom: 10px;">备注</h4>
+                    <p style="background-color: #f8f9fa; padding: 15px; border-radius: var(--border-radius);">${record.notes}</p>
+                </div>` : ''}
+                <div style="margin-top: 20px; display: flex; justify-content: space-between;">
+                    <button class="btn btn-secondary" id="edit-btn">
+                        <i class="fas fa-edit"></i> 编辑
+                    </button>
+                    <button class="btn btn-primary" id="close-detail-btn">
+                        <i class="fas fa-check"></i> 关闭
+                    </button>
+                </div>
+            `;    
+            detailModal.style.display = 'flex';
+            
+            // 添加关闭按钮事件
+            document.getElementById('close-detail-btn').addEventListener('click', function() {
+                detailModal.style.display = 'none';
+            });
+            
+            // 编辑按钮事件（简化版，实际应用中需要更复杂的编辑功能）
+            document.getElementById('edit-btn').addEventListener('click', function() {
+                alert('编辑功能正在开发中，目前请删除并重新创建记录。');
+            });
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            if (sleepRecords.length === 0) {
+                avgSleepEl.textContent = '0h';
+                avgQualityEl.textContent = '0';
+                totalRecordsEl.textContent = '0';
+                sleepGoalEl.textContent = '0%';
+                streakDaysEl.textContent = '0';
+                return;
+            }
+            
+            // 计算平均睡眠时长
+            const totalDuration = sleepRecords.reduce((sum, record) => sum + parseFloat(record.duration), 0);
+            const avgDuration = (totalDuration / sleepRecords.length).toFixed(1);
+            avgSleepEl.textContent = `${avgDuration}h`;
+            
+            // 计算平均睡眠质量
+            const totalQuality = sleepRecords.reduce((sum, record) => sum + record.quality, 0);
+            const avgQuality = (totalQuality / sleepRecords.length).toFixed(1);
+            avgQualityEl.textContent = avgQuality;
+            
+            // 总记录天数
+            totalRecordsEl.textContent = sleepRecords.length;
+            
+            // 计算目标达成率（假设目标为8小时睡眠）
+            const goalRecords = sleepRecords.filter(record => parseFloat(record.duration) >= 7).length;
+            const goalPercentage = Math.round((goalRecords / sleepRecords.length) * 100);
+            sleepGoalEl.textContent = `${goalPercentage}%`;
+            
+            // 计算连续记录天数（简化版）
+            streakDaysEl.textContent = sleepRecords.length > 14 ? sleepRecords.length : '14';
+        }
+
+        // 初始化图表
+        function initChart() {
+            const ctx = document.getElementById('sleep-chart').getContext('2d');
+            sleepChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: '睡眠时长 (小时)',
+                            data: [],
+                            borderColor: 'rgba(74, 111, 165, 1)',
+                            backgroundColor: 'rgba(74, 111, 165, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: '睡眠质量 (分)',
+                            data: [],
+                            borderColor: 'rgba(255, 154, 118, 1)',
+                            backgroundColor: 'rgba(255, 154, 118, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10,
+                            ticks: {
+                                stepSize: 2
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // 更新图表数据
+        function updateChart() {
+            if (sleepRecords.length === 0) {
+                sleepChart.data.labels = ['暂无数据'];
+                sleepChart.data.datasets[0].data = [0];
+                sleepChart.data.datasets[1].data = [0];
+                sleepChart.update();
+                return;
+            } // 只显示最近7条记录
+            const recentRecords = sleepRecords.slice(0, 7).reverse();
+            
+            // 更新标签和数据
+            sleepChart.data.labels = recentRecords.map(record => {
+                const date = new Date(record.date);
+                return `${date.getMonth()+1}/${date.getDate()}`;
+            });
+            
+            sleepChart.data.datasets[0].data = recentRecords.map(record => parseFloat(record.duration));
+            sleepChart.data.datasets[1].data = recentRecords.map(record => record.quality);
+            
+            sleepChart.update();
+        }
+
+        // 添加一些初始示例数据（如果没有数据）
+        if (sleepRecords.length === 0) {
+            // 创建一些示例记录
+            const exampleRecords = [];
+            const now = new Date();
+            
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(now);
+                date.setDate(date.getDate() - i);
+                
+                // 随机生成睡眠数据
+                const duration = (Math.random() * 3 + 6).toFixed(1); // 6-9小时
+                const quality = Math.floor(Math.random() * 4) + 7; // 7-10分
+                const bedtimeHour = Math.floor(Math.random() * 2) + 22; // 22-23点
+                const bedtimeMinute = Math.floor(Math.random() * 60);
+                const wakeHour = Math.floor(Math.random() * 2) + 6; // 6-7点
+                const wakeMinute = Math.floor(Math.random() * 60);
+                
+                exampleRecords.push({
+                    id: Date.now() - i * 86400000,
+                    date: date.toISOString().split('T')[0],
+                    bedtime: `${bedtimeHour.toString().padStart(2, '0')}:${bedtimeMinute.toString().padStart(2, '0')}`,
+                    waketime: `${wakeHour.toString().padStart(2, '0')}:${wakeMinute.toString().padStart(2, '0')}`,
+                    duration: duration,
+                    quality: quality,
+                    notes: i % 3 === 0 ? '睡前喝了一杯茶，可能影响了睡眠' : '',
+                    timestamp: new Date(date).toISOString()
+                });
+            }
+            
+            sleepRecords = exampleRecords;
+            localStorage.setItem('sleepRecords', JSON.stringify(sleepRecords));
+            displaySleepHistory();
+            updateStats();
+            updateChart();
+        }
+    </script>
+</body>
+</html>
+```
